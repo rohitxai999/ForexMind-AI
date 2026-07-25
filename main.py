@@ -5,28 +5,48 @@ def main():
 
     bot = Coordinator()
 
-    result = bot.run()
+    results = bot.run()
 
-    for pair, info in result.items():
+    for pair, info in results.items():
 
         print("=" * 60)
         print(pair)
 
-        signal = info["signal"]
+        print(
+            "Technical Signal :",
+            info["technical"]["decision"]
+        )
 
-        print(f"Decision    : {signal['decision']}")
-        print(f"Score       : {signal['score']}")
-        print(f"Confidence  : {signal['confidence']}%")
+        print(
+            "Score            :",
+            info["technical"]["score"]
+        )
 
-        latest = info["data"].iloc[-1]
+        print(
+            "Confidence       :",
+            info["technical"]["confidence"]
+        )
 
-        print(f"Price       : {latest['Close']:.5f}")
-        print(f"RSI         : {latest['RSI']:.2f}")
-        print(f"EMA20       : {latest['EMA20']:.5f}")
-        print(f"EMA50       : {latest['EMA50']:.5f}")
-        print(f"MACD        : {latest['MACD']:.5f}")
+        print(
+            "Sentiment        :",
+            info["sentiment"]
+        )
 
-        print()
+        print(
+            "Final Decision   :",
+            info["decision"]
+        )
+
+        print(
+            "Risk             :",
+            info["risk"]["risk"]
+        )
+
+        print(
+            "Position Size    :",
+            info["risk"]["position_size"]
+        )
+
 
 if __name__ == "__main__":
     main()
