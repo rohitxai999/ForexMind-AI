@@ -1,21 +1,49 @@
 class DecisionAgent:
+    """
+    Combines technical analysis and sentiment analysis
+    to generate the final trading decision.
+    """
 
-    def decide(
-        self,
-        technical_signal,
-        sentiment
-    ):
+    def decide(self, technical_signal, sentiment):
 
-        if (
-            technical_signal == "BUY"
-            and sentiment == "Bullish"
-        ):
-            return "BUY"
+        # Get the overall sentiment returned by SentimentAgent
+        overall_sentiment = sentiment.get("overall_sentiment", "Neutral")
 
-        if (
-            technical_signal == "SELL"
-            and sentiment == "Bearish"
-        ):
-            return "SELL"
+        # Strong BUY
+        if technical_signal == "BUY" and overall_sentiment == "Positive":
+            return {
+                "decision": "BUY",
+                "confidence": "High",
+                "reason": "Technical indicators and market sentiment are both bullish."
+            }
 
-        return "HOLD"
+        # Strong SELL
+        if technical_signal == "SELL" and overall_sentiment == "Negative":
+            return {
+                "decision": "SELL",
+                "confidence": "High",
+                "reason": "Technical indicators and market sentiment are both bearish."
+            }
+
+        # Technical BUY but sentiment disagrees
+        if technical_signal == "BUY" and overall_sentiment == "Negative":
+            return {
+                "decision": "HOLD",
+                "confidence": "Medium",
+                "reason": "Technical indicators suggest BUY, but sentiment is negative."
+            }
+
+        # Technical SELL but sentiment disagrees
+        if technical_signal == "SELL" and overall_sentiment == "Positive":
+            return {
+                "decision": "HOLD",
+                "confidence": "Medium",
+                "reason": "Technical indicators suggest SELL, but sentiment is positive."
+            }
+
+        # Neutral case
+        return {
+            "decision": "HOLD",
+            "confidence": "Low",
+            "reason": "No strong agreement between technical analysis and sentiment."
+        }
