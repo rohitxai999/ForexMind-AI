@@ -1,54 +1,108 @@
-from agents.market_agent import MarketAgent
 from agents.technical_agent import TechnicalAgent
 from agents.sentiment_agent import SentimentAgent
+from agents.prediction_agent import PredictionAgent
 from agents.risk_agent import RiskAgent
-from agents.decision_agent import DecisionAgent
+from agents.strategy_agent import StrategyAgent
+from agents.debate_agent import DebateAgent
 
 
-class Coordinator:
+class AgentCoordinator:
+
     def __init__(self):
-        self.market = MarketAgent()
+
         self.technical = TechnicalAgent()
         self.sentiment = SentimentAgent()
+        self.prediction = PredictionAgent()
         self.risk = RiskAgent()
-        self.decision = DecisionAgent()
+        self.strategy = StrategyAgent()
+        self.debate = DebateAgent()
 
-    def run(self):
-        # Collect live market data
-        market_data = self.market.collect_market()
 
-        # Run technical analysis
-        technicals = self.technical.analyze(market_data)
+    def analyze_market(self, market_data):
 
-        results = {}
+        agents_output = []
 
-        for pair, info in technicals.items():
 
-            # Technical trading signal
-            technical_signal = info["signal"]["decision"]
+        # Get currency pair
+        pair = list(market_data.keys())[0]
 
-            # Currency pair name (e.g. EURUSD)
-            pair_name = pair.replace("=X", "")
 
-            # Run sentiment analysis
-            sentiment = self.sentiment.analyze(pair_name)
+        # --------------------
+        # Technical Agent
+        # --------------------
 
-            # Make final trading decision
-            final_decision = self.decision.decide(
-                technical_signal,
-                sentiment
-            )
+        technical_result = self.technical.analyze(
+            market_data
+        )
 
-            # Calculate risk
-            risk = self.risk.calculate_risk(final_decision)
+        agents_output.extend(
+            technical_result
+        )
 
-            # Store results
-            results[pair] = {
-                "pair": pair_name,
-                "technical": info["signal"],
-                "sentiment": sentiment,
-                "decision": final_decision,
-                "risk": risk
-            }
 
-        return results
+        # --------------------
+        # Sentiment Agent
+        # --------------------
+
+        sentiment_result = self.sentiment.analyze(
+            pair
+        )
+
+        agents_output.append(
+            sentiment_result
+        )
+
+
+        # --------------------
+        # Prediction Agent
+        # --------------------
+
+        prediction_result = self.prediction.analyze(
+            market_data[pair]
+        )
+
+        agents_output.append(
+            prediction_result
+        )
+
+
+        # --------------------
+        # Strategy Agent
+        # --------------------
+
+        strategy_result = self.strategy.analyze(
+            market_data[pair]
+        )
+
+        agents_output.append(
+            strategy_result
+        )
+
+
+        # --------------------
+        # Debate Agent
+        # --------------------
+
+        debate_result = self.debate.analyze(
+            agents_output
+        )
+
+
+        # --------------------
+        # Risk Agent
+        # --------------------
+
+        risk_result = self.risk.calculate_risk(
+            debate_result
+        )
+
+
+        return {
+
+            "agents": agents_output,
+
+            "debate": debate_result,
+
+            "risk": risk_result
+
+        }
